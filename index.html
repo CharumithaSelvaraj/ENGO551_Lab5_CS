@@ -27,8 +27,8 @@
         <label>Topic</label>
         <input type="text" id="topic">
 
-        <button id="startButton">Start</button>
-        <button id="endButton">End</button>
+        <button id="startButton">Start Connection</button>
+        <button id="endButton">End Connection</button>
     </div>
 
     <div id="map"></div>
@@ -37,6 +37,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
+    
+    <!-- Paho-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 
     <script>
         // Calgary coordinates
@@ -47,6 +50,17 @@
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
+
+        // MQTT Logic: 
+        var hostInput = document.getElementById("host");
+        var portInput = document.getElementById("port");
+        var topicInput = document.getElementById("topic");
+        var startButton = document.getElementById("startButton");
+        var endButton = document.getElementById("endButton");
+
+
+
+        
     </script>
 
 </body>
