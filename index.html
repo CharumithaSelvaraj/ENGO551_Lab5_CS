@@ -24,14 +24,18 @@
         <label>Port</label>
         <input type="text" id="port" value="8081">
 
-        <label>Topic</label>
+        <label>Publish Topic</label>
         <input type="text" id="topic">
 
         <button id="startButton">Start Connection</button>
         <button id="endButton">End Connection</button>
 
         <p id="status">Status: Not Connected</p>
-        <p id="messages">Messages coming...</p>
+        <p id="messages">Waiting for recieved messages...</p>
+
+        <label>Message</label>
+        <input type="text" id="messageText">
+        <button id="publishButton">Publish Message</button>
 
     </div>
 
@@ -56,16 +60,20 @@
         }).addTo(map);
 
         // MQTT Logic: 
+
+        // variables from screen
         var hostInput = document.getElementById("host");
         var portInput = document.getElementById("port");
         var topicInput = document.getElementById("topic");
+        var messageInput = document.getElementById("messageText");
         var startButton = document.getElementById("startButton");
         var endButton = document.getElementById("endButton");
+        var publishButton = document.getElementById("publishButton");
         var statusText = document.getElementById("status");
         var messagesText = document.getElementById("messages");
 
         // Variables and logic adapted from Steves Example Code: http://www.steves-internet-guide.com/mosquitto-broker/
-        var client = null;
+        var mqtt = null;
         var connectedFlag = 0;
         var reconnectTimeout = 2000;
 
@@ -101,7 +109,7 @@
             // topic input logic and sub to topic
             var topic = topicInput.value;
             if (topic !== "") {
-                client.subscribe(topic);
+                mqtt.subscribe(topic);
                 console.log("Subscribed to " + topic);
                 messagesText.innerHTML = "Subscribed to: " + topic;
             }
@@ -122,15 +130,15 @@
             // save variable values
             var host = hostInput.value;
             var port = parseInt(portInput.value);
-            var clientName = "client-" + Math.floor(Math.random() * 10000);
+            var mqttName = "mqtt-" + Math.floor(Math.random() * 10000);
 
             // create paho connection 
-            mqtt = new Paho.MQTT.Client(host, port, clientName);
+            mqtt = new Paho.MQTT.Client(host, port, mqttName);
 
             mqtt.onConnectionLost = onConnectionLost;
             mqtt.onMessageArrived = onMessageArrived;
 
-            console.log("MQTT client created for " + host + ":" + port);
+            console.log("MQTT mqtt created for " + host + ":" + port);
 
             mqtt.connect({
                 timeout: 3,
@@ -138,26 +146,55 @@
                 onFailure: onFailure,
                 useSSL: true
             });
+        }
 
-            // diconnect connection 
-            function disconnectMQTT() {
-                if (connectedFlag === 1 && client !== null) {
-                    client.disconnect();
-                    connectedFlag = 0;
-                    console.log("Disconnected");
-                    statusText.innerHTML = "Status: Disconnected";
+        // diconnect connection 
+        function disconnectMQTT() {
+            if (connectedFlag === 1 && mqtt !== null) {
+                mqtt.disconnect();
+                connectedFlag = 0;
+                console.log("Disconnected");
+                statusText.innerHTML = "Status: Disconnected";
 
-                    // unlock the inputs
-                    hostInput.disabled = false;
-                    portInput.disabled = false;
-                }
+                // unlock the inputs
+                hostInput.disabled = false;
+                portInput.disabled = false;
             }
         }
+
+        // publish the message from user
+        function publishMessage() {
+            // can't publish if
+            if (connectedFlag !== 1 || mqtt === null) {
+                messagesText.innerHTML = "Not connected, cannot publish.";
+                return;
+            }
+
+            var topic = topicInput.value;
+            var messageText = messageInput.value;
+
+            // check if user forgot remind them
+            if (topic === "") {
+                messagesText.innerHTML = "Please enter a topic.";
+                return;
+            }
+            if (messageText === "") {
+                messagesText.innerHTML = "Please enter a message.";
+                return;
+            }
+
+            // message and publish to topic
+            var message = new Paho.MQTT.Message(messageText);
+            message.destinationName = topic;
+            mqtt.send(message);
+            console.log("Message published to " + topic);
+            messagesText.innerHTML = "Published to " + topic + ": " + messageText;
+        }
+
         // Button logic
         startButton.addEventListener("click", setupMQTTClient);
         endButton.addEventListener("click", disconnectMQTT);
-        
+        publishButton.addEventListener("click", publishMessage);
     </script>
-
 </body>
 </html>
