@@ -37,6 +37,7 @@
         <input type="text" id="messageText">
         <button id="publishButton">Publish Message</button>
 
+        <button id="shareButton">Share My Status</button>
     </div>
 
     <div id="map"></div>
@@ -71,6 +72,7 @@
         var publishButton = document.getElementById("publishButton");
         var statusText = document.getElementById("status");
         var messagesText = document.getElementById("messages");
+        var shareButton = document.getElementById("shareButton");
 
         // Variables and logic adapted from Steves Example Code: http://www.steves-internet-guide.com/mosquitto-broker/
         var mqtt = null;
@@ -191,10 +193,62 @@
             messagesText.innerHTML = "Published to " + topic + ": " + messageText;
         }
 
+        function shareStatus() {
+            // verify if user is connected first
+            if (connectedFlag !== 1 || mqtt === null) {
+                messagesText.innerHTML = "Not connected.";
+                return;
+            }
+
+            // check if it will even work
+            if (!navigator.geolocation) {
+                messagesText.innerHTML = "Geolocation not working.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                // get lat and lon
+                var lat = position.coords.latitude;
+                var lon = position.coords.longitude;
+
+                // random temperature (between -40 to 60) 
+                var temp = Math.floor(Math.random() * 101) - 40;
+
+                //  GeoJSON object
+                var geojson = {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [lon, lat]
+                    },
+                    properties: {
+                        temperature: temp
+                    }
+                };
+
+                var topic = topicInput.value;
+                // double check topic isn't empty
+                if (topic === "") {
+                    messagesText.innerHTML = "Please enter a topic.";
+                    return;
+                }
+                // create message and send message
+                var message = new Paho.MQTT.Message(JSON.stringify(geojson));
+                message.destinationName = topic;
+                mqtt.send(message);
+                console.log("GeoJSON sent:", geojson);
+                messagesText.innerHTML = "Shared location (lat): " + lat + "(lon): "+ lon + " with temperature: " + temp;
+
+            }, function() {
+                messagesText.innerHTML = "Failed to get location.";
+            });
+        }
+
         // Button logic
         startButton.addEventListener("click", setupMQTTClient);
         endButton.addEventListener("click", disconnectMQTT);
         publishButton.addEventListener("click", publishMessage);
+        shareButton.addEventListener("click", shareStatus);
     </script>
 </body>
 </html>
