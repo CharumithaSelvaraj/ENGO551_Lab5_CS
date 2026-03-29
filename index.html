@@ -58,6 +58,53 @@
         var startButton = document.getElementById("startButton");
         var endButton = document.getElementById("endButton");
 
+        // Variables and logic adapted from Steves Example Code: http://www.steves-internet-guide.com/mosquitto-broker/
+        var client = null;
+        var connectedFlag = 0;
+        var reconnectTimeout = 2000;
+
+
+        // connect is lost 
+        function onConnectionLost() {
+            console.log("Connection lost");
+            connectedFlag = 0;
+        }
+
+        // message arrived
+        function onMessageArrived(message) {
+            console.log("Message received: " + message.payloadString);
+            console.log("Topic: " + message.destinationName);
+        }
+
+        // connection made
+        function onConnect() {
+            console.log("Connected");
+            connectedFlag = 1;
+        }
+
+        // connection failed
+        function onFailure(message) {
+            console.log("Connection failed");
+        }
+
+        // setting up MQTT with variable and connection
+        function setupMQTTClient() {
+            // save variable values
+            var host = hostInput.value;
+            var port = parseInt(portInput.value);
+            var clientName = "client-" + Math.floor(Math.random() * 10000);
+
+            // create paho connection 
+            mqtt = new Paho.MQTT.Client(host, port, clientName);
+
+            mqtt.onConnectionLost = onConnectionLost;
+            mqtt.onMessageArrived = onMessageArrived;
+
+            console.log("MQTT client created for " + host + ":" + port);
+        }
+
+
+
 
 
         
