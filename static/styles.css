@@ -1,0 +1,137 @@
+/* Colours from pallete: https://paperheartdesign.com/blog/color-palette-forest-floor */
+/* box inheritance */
+.content-box {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Page Background */
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+  background-size: cover;
+  background-position: center;
+  background-color: #c3dbe7;
+}
+
+/* Sidebar */
+.sidebar {
+  float: left;
+  width: 20%;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #c3dbe7;
+  color: #1a2626;
+}
+
+/* Map */
+#map {
+  float: left;
+  width: 80%;
+  height: 100vh;
+}
+
+/* Content Box */
+.content-box {
+  /*inheritance use */
+  background-color: #c3dbe7;
+  color: #1a2626;
+}
+
+/* Navigation Bar */
+.nav-box {
+  background-color: #074d66;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+}
+.nav-box a {
+  color: #c3dbe7;
+  text-decoration: none;
+  padding: 8px 12px;
+}
+.nav-box a:hover {
+  color: #4a8da7;
+  border-bottom: 2px solid #4a8da7;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #29443b;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #4a8da7;
+  color: white;
+}
+
+/* Forms */
+form {
+  margin-top: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #29443b;
+  border-radius: 4px;
+}
+
+/* Button */
+button {
+  padding: 8px 14px;
+  background-color: #074d66;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #1a2626;
+}
+
+/* Text */
+h1 {
+  color: #074d66;
+}
+
+h2 {
+  color: #29443b;
+}
+
+p {
+  color: #1a2626;
+}
+
+/* Media Query */
+@media (max-width: 600px) {
+  .content-box {
+    padding: 15px;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    float: none;
+  }
+  #map {
+    width: 100%;
+    height: 70vh;
+    float: none;
+  }
+}/*# sourceMappingURL=styles.css.map */
