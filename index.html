@@ -101,12 +101,26 @@
             mqtt.onMessageArrived = onMessageArrived;
 
             console.log("MQTT client created for " + host + ":" + port);
+
+            mqtt.connect({
+                timeout: 3,
+                onSuccess: onConnect,
+                onFailure: onFailure,
+                useSSL: true
+            });
+
+            // diconnect connection 
+            function disconnectMQTT() {
+                if (connectedFlag === 1 && client !== null) {
+                    client.disconnect();
+                    connectedFlag = 0;
+                    console.log("Disconnected");
+                }
+            }
         }
-
-
-
-
-
+        // Button logic
+        startButton.addEventListener("click", setupMQTTClient);
+        endButton.addEventListener("click", disconnectMQTT);
         
     </script>
 
