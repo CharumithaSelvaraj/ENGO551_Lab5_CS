@@ -72,6 +72,10 @@
             console.log("Connection lost");
             connectedFlag = 0;
             statusText.innerHTML = "Status: Connection Lost";
+            
+            // unlock inputs
+            hostInput.disabled = false;
+            portInput.disabled = false;
         }
 
         // message arrived
@@ -85,12 +89,20 @@
             console.log("Connected");
             connectedFlag = 1;
             statusText.innerHTML = "Status: Connected";
+
+            // lock inputs
+            hostInput.disabled = true;
+            portInput.disabled = true;
         }
 
         // connection failed
         function onFailure(message) {
             console.log("Connection failed");
             statusText.innerHTML = "Status: Connection Failed";
+
+            // unlock inputs
+            hostInput.disabled = false;
+            portInput.disabled = false;
         }
 
         // setting up MQTT with variable and connection
@@ -122,6 +134,10 @@
                     connectedFlag = 0;
                     console.log("Disconnected");
                     statusText.innerHTML = "Status: Disconnected";
+
+                    // unlock the inputs
+                    hostInput.disabled = false;
+                    portInput.disabled = false;
                 }
             }
         }
