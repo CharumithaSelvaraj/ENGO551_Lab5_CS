@@ -25,7 +25,7 @@
         <input type="text" id="port" value="8081">
 
         <label>Publish Topic</label>
-        <input type="text" id="topic">
+        <input type="text" id="topic" value="ENGO551/Charu/my_temperature">
 
         <button id="startButton">Start Connection</button>
         <button id="endButton">End Connection</button>
@@ -89,6 +89,8 @@
             // unlock inputs
             hostInput.disabled = false;
             portInput.disabled = false;
+
+            setTimeout(setupMQTTClient, reconnectTimeout);
         }
 
         // message arrived
