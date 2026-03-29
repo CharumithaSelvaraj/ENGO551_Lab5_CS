@@ -73,12 +73,12 @@
         var statusText = document.getElementById("status");
         var messagesText = document.getElementById("messages");
         var shareButton = document.getElementById("shareButton");
+        var marker = null;
 
         // Variables and logic adapted from Steves Example Code: http://www.steves-internet-guide.com/mosquitto-broker/
         var mqtt = null;
         var connectedFlag = 0;
         var reconnectTimeout = 2000;
-
 
         // connect is lost 
         function onConnectionLost() {
@@ -94,8 +94,46 @@
         // message arrived
         function onMessageArrived(message) {
             console.log("Message received: " + message.payloadString);
-            console.log("Topic: " + message.destinationName);
-            messagesText.innerHTML = "Message received:" + message.destinationName + ":" + message.payloadString;
+
+            // parse JSON else print message
+            var data;
+            try {
+                data = JSON.parse(message.payloadString);
+            } catch (e) {
+                messagesText.innerHTML = "Invalid message format";
+                return;
+            }   
+
+            var lon = data.geometry.coordinates[0];
+            var lat = data.geometry.coordinates[1];
+            var temp = data.properties.temperature;
+
+            // temperature colour based on reqs
+            var colour;
+            if (temp >= -40 && temp < 10) {
+                colour = "blue";
+            } else if (temp >= 10 && temp < 30) {
+                colour = "green";
+            } else {
+                colour = "red";
+            }
+
+            // create marker
+            marker = L.circleMarker([lat, lon], {
+                radius: 10,
+                color: colour,
+                fillColor: colour,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            // popup 
+            marker.bindPopup(
+                "Lat: " + lat.toFixed(3) +
+                "<br>Lon: " + lon.toFixed(3) +
+                "<br>Temp: " + temp + "°C"
+            );
+
+            messagesText.innerHTML = "Map updated";
         }
 
         // connection made
