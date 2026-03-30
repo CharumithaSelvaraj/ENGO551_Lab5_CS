@@ -16,7 +16,10 @@
 
     <!-- Sidebar of screen -->
     <div class="sidebar">
-        <h2>Charu's Lab 5 IoT GeoWeb App</h2>
+        <h3>Charu's Lab 5 IoT GeoWeb App</h3>
+
+        <!-- 1. CONNECTION -->
+        <h4>Connection</h4>
 
         <label>MQTT Host</label>
         <input type="text" id="host" value="test.mosquitto.org">
@@ -24,20 +27,35 @@
         <label>Port</label>
         <input type="text" id="port" value="8081">
 
-        <label>Publish Topic</label>
+        <label>Topic</label>
         <input type="text" id="topic" value="ENGO551/Charu/my_temperature">
 
         <button id="startButton">Start Connection</button>
         <button id="endButton">End Connection</button>
 
         <p id="status">Status: Not Connected</p>
-        <p id="messages">Waiting for recieved messages...</p>
+
+        <hr>
+
+        <!-- 2. TEXT MESSAGING -->
+        <h4>Send Message</h4>
 
         <label>Message</label>
         <input type="text" id="messageText">
+
         <button id="publishButton">Publish Message</button>
 
+        <hr>
+
+        <!-- 3. LOCATION / GEOJSON -->
+        <h4>Share Location</h4>
+
         <button id="shareButton">Share My Status</button>
+
+        <hr>
+
+        <!-- OUTPUT -->
+        <p id="messages">Waiting for messages...</p>
     </div>
 
     <div id="map"></div>
@@ -96,46 +114,62 @@
         // message arrived
         function onMessageArrived(message) {
             console.log("Message received: " + message.payloadString);
+            console.log("Topic: " + message.destinationName);
 
-            // parse JSON else print message
-            var data;
-            try {
-                data = JSON.parse(message.payloadString);
-            } catch (e) {
-                messagesText.innerHTML = "Invalid message format";
-                return;
-            }   
+            // if it is the map topic, expect GeoJSON
+            if (message.destinationName === "ENGO551/Charu/my_temperature") {
+                var data;
 
-            var lon = data.geometry.coordinates[0];
-            var lat = data.geometry.coordinates[1];
-            var temp = data.properties.temperature;
+                // parse JSON else print message
+                try {
+                    data = JSON.parse(message.payloadString);
+                } catch (e) {
+                    messagesText.innerHTML = "Expected GeoJSON on my_temperature topic.";
+                    return;
+                }
 
-            // temperature colour based on reqs
-            var colour;
-            if (temp >= -40 && temp < 10) {
-                colour = "blue";
-            } else if (temp >= 10 && temp < 30) {
-                colour = "green";
-            } else {
-                colour = "red";
+                var lon = data.geometry.coordinates[0];
+                var lat = data.geometry.coordinates[1];
+                var temp = data.properties.temperature;
+
+                // temperature colour based on reqs
+                var colour;
+                if (temp >= -40 && temp < 10) {
+                    colour = "blue";
+                } else if (temp >= 10 && temp < 30) {
+                    colour = "green";
+                } else {
+                    colour = "red";
+                }
+
+                // remove previous marker if it exists
+                if (marker !== null) {
+                    map.removeLayer(marker);
+                }
+
+                // create marker
+                marker = L.circleMarker([lat, lon], {
+                    radius: 10,
+                    color: colour,
+                    fillColor: colour,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                // popup 
+                marker.bindPopup(
+                    "Lat: " + lat.toFixed(3) +
+                    "<br>Lon: " + lon.toFixed(3) +
+                    "<br>Temp: " + temp + "°C"
+                );
+
+                messagesText.innerHTML = "GeoJSON received on " + message.destinationName;
+            } 
+            
+            // otherwise just show the normal message
+            else {
+                messagesText.innerHTML =
+                    "Message received on " + message.destinationName + ": " + message.payloadString;
             }
-
-            // create marker
-            marker = L.circleMarker([lat, lon], {
-                radius: 10,
-                color: colour,
-                fillColor: colour,
-                fillOpacity: 0.8
-            }).addTo(map);
-
-            // popup 
-            marker.bindPopup(
-                "Lat: " + lat.toFixed(3) +
-                "<br>Lon: " + lon.toFixed(3) +
-                "<br>Temp: " + temp + "°C"
-            );
-
-            messagesText.innerHTML = "Map updated";
         }
 
         // connection made
